@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音声再生</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .play-button {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 20px;
+            transition: all 0.3s;
+            display: none;
+        }
+        .play-button:hover {
+            background: #ff5252;
+            transform: scale(1.05);
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(255, 75, 87, 0.6); }
+            100% { transform: scale(1); }
+        }
+        .status {
+            margin: 20px 0;
+            font-size: 16px;
+        }
+        .audio-controls {
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 音声メッセージ</h1>
+        <div class="status" id="status">音声を準備中...</div>
+        
+        <button class="play-button" id="playBtn" onclick="playAudio()">
+            ▶ 再生
+        </button>
+        
+        <div class="audio-controls">
+            <audio id="audioPlayer" controls style="width: 100%; margin-top: 20px;" preload="auto">
+                <!-- 実際にアップロードした音声ファイル名に変更 -->
+                <source src="./audio.mp3" type="audio/mpeg">
+                <source src="./audio.wav" type="audio/wav">
+                <!-- 外部音声ファイルのURL例 -->
+                <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" type="audio/mpeg">
+                お使いのブラウザは音声再生に対応していません。
+            </audio>
+        </div>
+        
+        <p>QRコードからアクセスしていただき、ありがとうございます！</p>
+    </div>
+
+    <script>
+        const audio = document.getElementById('audioPlayer');
+        const status = document.getElementById('status');
+        const playBtn = document.getElementById('playBtn');
+
+        // 複数の自動再生トリガーを設定
+        let autoPlayAttempted = false;
+
+        // ページ読み込み時の処理
+        window.addEventListener('load', function() {
+            status.textContent = '音声の準備ができました';
+            
+            // 少し遅延させてから自動再生を試行
+            setTimeout(attemptAutoPlay, 500);
+        });
+
+        // ユーザーの最初のインタラクション（タップ、クリック、キー操作）を検知
+        const userInteractionEvents = ['touchstart', 'touchend', 'click', 'keydown', 'mousedown'];
+        
+        userInteractionEvents.forEach(event => {
+            document.addEventListener(event, function() {
+                if (!autoPlayAttempted) {
+                    attemptAutoPlay();
+                }
+            }, {once: true, passive: true});
+        });
+
+        // ページがフォーカスされた時も試行
+        window.addEventListener('focus', function() {
+            if (!autoPlayAttempted) {
+                attemptAutoPlay();
+            }
+        });
+
+        // 画面のどこかをタップした時に再生
+        document.body.addEventListener('click', function() {
+            if (audio.paused && !autoPlayAttempted) {
+                attemptAutoPlay();
+            }
+        });
+
+        function attemptAutoPlay() {
+            autoPlayAttempted = true;
+            
+            // 音量を設定（0.5 = 50%）
+            audio.volume = 0.7;
+            
+            // 自動再生を試みる
+            const playPromise = audio.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.then(function() {
+                    status.textContent = '🎵 音声を再生中...';
+                    playBtn.textContent = '⏸ 停止';
+                    playBtn.style.display = 'inline-block';
+                }).catch(function(error) {
+                    status.textContent = '📱 画面をタップすると音声が再生されます';
+                    playBtn.style.display = 'inline-block';
+                    console.log('自動再生制限:', error.message);
+                    
+                    // 自動再生に失敗した場合、視覚的に再生ボタンを目立たせる
+                    playBtn.style.animation = 'pulse 2s infinite';
+                    playBtn.style.background = '#ff4757';
+                });
+            }
+        }
+
+        function playAudio() {
+            if (audio.paused) {
+                audio.play();
+                playBtn.textContent = '⏸ 停止';
+                status.textContent = '音声を再生中...';
+            } else {
+                audio.pause();
+                playBtn.textContent = '▶ 再生';
+                status.textContent = '音声を停止しました';
+            }
+        }
+
+        // 音声再生終了時の処理
+        audio.addEventListener('ended', function() {
+            playBtn.textContent = '▶ 再生';
+            status.textContent = '再生が終了しました';
+        });
+
+        // エラーハンドリング
+        audio.addEventListener('error', function(e) {
+            status.textContent = '音声ファイルの読み込みに失敗しました';
+            console.error('Audio error:', e);
+        });
+    </script>
+</body>
+</html>
