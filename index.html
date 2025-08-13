@@ -72,7 +72,7 @@
         <div class="audio-controls">
             <audio id="audioPlayer" controls style="width: 100%; margin-top: 20px;" preload="auto">
                 <!-- 複数の形式とパスを試行 -->
-                <source src="./MenzuT-Kenshin-v2.mp3" type="audio/mpeg">
+                <source src="./MenzuT-Kenshin.mp3" type="audio/mpeg">
             </audio>
         </div>
         
@@ -105,7 +105,7 @@
         // 音声ファイルの存在確認
         function checkAudioFile() {
             const testAudio = new Audio();
-            testAudio.src = './MenzuT-Kenshin-v2.mp3';
+            testAudio.src = './MenzuT-Kenshin.mp3';
             
             testAudio.addEventListener('canplaythrough', function() {
                 debugInfo.innerHTML = '✅ 音声ファイル読み込み成功';
