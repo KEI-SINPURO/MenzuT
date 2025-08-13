@@ -50,6 +50,14 @@
         .audio-controls {
             margin: 20px 0;
         }
+        .debug-info {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 14px;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
@@ -63,9 +71,19 @@
         
         <div class="audio-controls">
             <audio id="audioPlayer" controls style="width: 100%; margin-top: 20px;" preload="auto">
-                <!-- 実際にアップロードした音声ファイル名に変更 -->
+                <!-- 複数の形式とパスを試行 -->
                 <source src="./MenzuT-Kenshin.mp3" type="audio/mpeg">
+                <source src="MenzuT-Kenshin.mp3" type="audio/mpeg">
+                <source src="./MenzuT-Kenshin.wav" type="audio/wav">
+                <!-- 代替音声（テスト用） -->
+                <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" type="audio/mpeg">
+                お使いのブラウザは音声再生に対応していません。
             </audio>
+        </div>
+        
+        <div class="debug-info" id="debugInfo">
+            <strong>デバッグ情報:</strong><br>
+            <div id="fileStatus">ファイル確認中...</div>
         </div>
         
         <p>QRコードからアクセスしていただき、ありがとうございます！</p>
@@ -75,6 +93,7 @@
         const audio = document.getElementById('audioPlayer');
         const status = document.getElementById('status');
         const playBtn = document.getElementById('playBtn');
+        const debugInfo = document.getElementById('fileStatus');
 
         // 複数の自動再生トリガーを設定
         let autoPlayAttempted = false;
@@ -82,10 +101,37 @@
         // ページ読み込み時の処理
         window.addEventListener('load', function() {
             status.textContent = '音声の準備ができました';
+            checkAudioFile();
             
             // 少し遅延させてから自動再生を試行
-            setTimeout(attemptAutoPlay, 500);
+            setTimeout(attemptAutoPlay, 1000);
         });
+
+        // 音声ファイルの存在確認
+        function checkAudioFile() {
+            const testAudio = new Audio();
+            testAudio.src = './MenzuT-Kenshin.mp3';
+            
+            testAudio.addEventListener('canplaythrough', function() {
+                debugInfo.innerHTML = '✅ 音声ファイル読み込み成功';
+                debugInfo.style.color = '#4CAF50';
+            });
+            
+            testAudio.addEventListener('error', function(e) {
+                debugInfo.innerHTML = `❌ 音声ファイルエラー: ${e.target.error ? e.target.error.message : '不明なエラー'}`;
+                debugInfo.style.color = '#f44336';
+                
+                // 代替ファイルを試行
+                tryAlternativeFile();
+            });
+            
+            testAudio.load();
+        }
+
+        // 代替ファイル試行
+        function tryAlternativeFile() {
+            debugInfo.innerHTML += '<br>🔄 代替ファイルを試行中...';
+        }
 
         // ユーザーの最初のインタラクション（タップ、クリック、キー操作）を検知
         const userInteractionEvents = ['touchstart', 'touchend', 'click', 'keydown', 'mousedown'];
@@ -115,7 +161,7 @@
         function attemptAutoPlay() {
             autoPlayAttempted = true;
             
-            // 音量を設定（0.5 = 50%）
+            // 音量を設定
             audio.volume = 0.7;
             
             // 自動再生を試みる
@@ -140,9 +186,13 @@
 
         function playAudio() {
             if (audio.paused) {
-                audio.play();
-                playBtn.textContent = '⏸ 停止';
-                status.textContent = '音声を再生中...';
+                audio.play().then(function() {
+                    playBtn.textContent = '⏸ 停止';
+                    status.textContent = '音声を再生中...';
+                }).catch(function(error) {
+                    status.textContent = '再生エラーが発生しました';
+                    debugInfo.innerHTML = `再生エラー: ${error.message}`;
+                });
             } else {
                 audio.pause();
                 playBtn.textContent = '▶ 再生';
@@ -156,10 +206,38 @@
             status.textContent = '再生が終了しました';
         });
 
-        // エラーハンドリング
+        // エラーハンドリング（詳細）
         audio.addEventListener('error', function(e) {
             status.textContent = '音声ファイルの読み込みに失敗しました';
-            console.error('Audio error:', e);
+            const error = e.target.error;
+            let errorMsg = '不明なエラー';
+            
+            if (error) {
+                switch(error.code) {
+                    case error.MEDIA_ERR_ABORTED:
+                        errorMsg = 'ダウンロードが中断されました';
+                        break;
+                    case error.MEDIA_ERR_NETWORK:
+                        errorMsg = 'ネットワークエラー';
+                        break;
+                    case error.MEDIA_ERR_DECODE:
+                        errorMsg = 'デコードエラー（ファイル形式の問題）';
+                        break;
+                    case error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+                        errorMsg = 'ファイルが見つからないか、サポートされていません';
+                        break;
+                }
+            }
+            
+            debugInfo.innerHTML = `❌ ${errorMsg}`;
+            debugInfo.style.color = '#f44336';
+            console.error('Audio error:', error);
+        });
+
+        // 音声読み込み成功時
+        audio.addEventListener('loadeddata', function() {
+            debugInfo.innerHTML = '✅ 音声データ読み込み完了';
+            debugInfo.style.color = '#4CAF50';
         });
     </script>
 </body>
