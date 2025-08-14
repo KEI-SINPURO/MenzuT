@@ -3,330 +3,510 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>音声再生</title>
+    <title>音声メッセージ</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px;
+            font-family: 'Hiragino Sans', 'Yu Gothic', Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             min-height: 100vh;
-            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
+        
         .container {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 30px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            max-width: 500px;
-            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 40px 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            max-width: 400px;
+            width: 90vw;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
         }
-        .play-button {
-            background: #ff6b6b;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 18px;
-            border-radius: 25px;
+        
+        .pulse-circle {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 30px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            animation: pulse 2s infinite;
             cursor: pointer;
-            margin: 20px;
             transition: all 0.3s;
-            display: none;
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
         }
-        .play-button:hover {
-            background: #ff5252;
+        
+        .pulse-circle:hover {
             transform: scale(1.05);
+            box-shadow: 0 15px 35px rgba(255, 107, 107, 0.5);
         }
-        .auto-play-button {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 20px 40px;
-            font-size: 20px;
-            border-radius: 30px;
-            cursor: pointer;
-            margin: 20px;
-            transition: all 0.3s;
-            display: none;
-            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
-        }
-        .auto-play-button:hover {
-            background: #45a049;
-            transform: scale(1.1);
-        }
+        
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(255, 75, 87, 0.6); }
-            100% { transform: scale(1); }
+            0% { 
+                transform: scale(1);
+                box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+            }
+            50% { 
+                transform: scale(1.08);
+                box-shadow: 0 15px 35px rgba(255, 107, 107, 0.6);
+            }
+            100% { 
+                transform: scale(1);
+                box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+            }
         }
-        @keyframes glow {
-            0% { box-shadow: 0 0 5px rgba(76, 175, 80, 0.5); }
-            50% { box-shadow: 0 0 25px rgba(76, 175, 80, 0.8); }
-            100% { box-shadow: 0 0 5px rgba(76, 175, 80, 0.5); }
+        
+        .title {
+            font-size: 24px;
+            margin-bottom: 15px;
+            font-weight: 300;
+            letter-spacing: 1px;
         }
+        
         .status {
-            margin: 20px 0;
-            font-size: 18px;
-            font-weight: bold;
-        }
-        .audio-controls {
-            margin: 20px 0;
-            display: none;
-        }
-        .tap-instruction {
-            background: rgba(255, 193, 7, 0.2);
-            color: #fff3cd;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
             font-size: 16px;
-            display: none;
+            margin: 20px 0;
+            opacity: 0.9;
+            min-height: 20px;
         }
-        .hidden-audio {
+        
+        .tap-area {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            cursor: pointer;
+        }
+        
+        .audio-hidden {
             position: absolute;
             left: -9999px;
             width: 1px;
             height: 1px;
+            opacity: 0;
+        }
+        
+        .controls {
+            margin-top: 30px;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        
+        .controls.visible {
+            opacity: 1;
+        }
+        
+        .control-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 5px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .footer-text {
+            margin-top: 30px;
+            font-size: 14px;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+        
+        .loading-spinner {
+            display: none;
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* モバイル特有の最適化 */
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+                border-radius: 15px;
+            }
+            
+            .pulse-circle {
+                width: 100px;
+                height: 100px;
+                font-size: 35px;
+            }
+            
+            .title {
+                font-size: 20px;
+            }
+        }
+        
+        /* フルスクリーンモード */
+        .fullscreen-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        
+        .fullscreen-overlay.active {
+            display: flex;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎵 音声メッセージ</h1>
-        <div class="status" id="status">音声を準備中...</div>
-        
-        <button class="auto-play-button" id="autoPlayBtn" onclick="forceAutoPlay()">
-            🎧 音声を再生する
-        </button>
-        
-        <button class="play-button" id="playBtn" onclick="playAudio()">
-            ▶ 再生
-        </button>
-        
-        <div class="tap-instruction" id="tapInstruction">
-            📱 どこでもタップすると音声が自動で再生されます
+    <!-- フルスクリーン音声再生領域 -->
+    <div class="tap-area" id="tapArea"></div>
+    
+    <div class="container" id="mainContainer">
+        <div class="pulse-circle" id="playCircle">
+            <span id="playIcon">🎵</span>
         </div>
         
-        <div class="audio-controls" id="audioControls">
-            <audio id="audioPlayer" controls style="width: 100%; margin-top: 20px;" preload="auto">
-                <source src="./MenzuT-Kenshin.mp3" type="audio/mpeg">
-            </audio>
+        <h1 class="title">音声メッセージ</h1>
+        <div class="status" id="status">画面をタップして再生</div>
+        
+        <div class="loading-spinner" id="loadingSpinner"></div>
+        
+        <div class="controls" id="controls">
+            <button class="control-btn" id="playBtn" onclick="toggleAudio()">▶ 再生</button>
+            <button class="control-btn" id="pauseBtn" onclick="pauseAudio()">⏸ 停止</button>
         </div>
         
-        <!-- 隠されたオーディオ要素（自動再生用） -->
-        <audio class="hidden-audio" id="hiddenAudio" preload="auto" loop>
-            <source src="./MenzuT-Kenshin.mp3" type="audio/mpeg">
-        </audio>
-        
-        <p>QRコードからアクセスしていただき、ありがとうございます！</p>
+        <div class="footer-text">
+            QRコードからアクセスしていただき、<br>ありがとうございます！
+        </div>
+    </div>
+    
+    <!-- 隠し音声要素（複数のフォールバック） -->
+    <audio class="audio-hidden" id="audioMain" preload="auto" crossorigin="anonymous">
+        <source src="./MenzuT-Kenshin.mp3" type="audio/mpeg">
+        <source src="MenzuT-Kenshin.mp3" type="audio/mpeg">
+        <source src="./audio/MenzuT-Kenshin.mp3" type="audio/mpeg">
+    </audio>
+    
+    <!-- フルスクリーンオーバーレイ -->
+    <div class="fullscreen-overlay" id="fullscreenOverlay">
+        <button class="close-btn" onclick="closeFullscreen()">×</button>
+        <div class="pulse-circle" style="margin-bottom: 30px;">
+            <span>🎧</span>
+        </div>
+        <h2>音声を再生中...</h2>
     </div>
 
     <script>
-        const audio = document.getElementById('audioPlayer');
-        const hiddenAudio = document.getElementById('hiddenAudio');
+        const audio = document.getElementById('audioMain');
         const status = document.getElementById('status');
-        const playBtn = document.getElementById('playBtn');
-        const autoPlayBtn = document.getElementById('autoPlayBtn');
-        const tapInstruction = document.getElementById('tapInstruction');
-        const audioControls = document.getElementById('audioControls');
-
-        let autoPlayAttempted = false;
-        let userInteracted = false;
+        const playCircle = document.getElementById('playCircle');
+        const playIcon = document.getElementById('playIcon');
+        const controls = document.getElementById('controls');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const tapArea = document.getElementById('tapArea');
+        const fullscreenOverlay = document.getElementById('fullscreenOverlay');
+        
+        let audioContext = null;
+        let isPlaying = false;
         let audioReady = false;
-
-        // ページ読み込み時の処理
+        let userInteracted = false;
+        let autoPlayTriggered = false;
+        
+        // 最適化されたオーディオ設定
+        audio.volume = 0.85;
+        audio.preload = 'auto';
+        
+        // ページ読み込み完了時
         window.addEventListener('load', function() {
             initializeAudio();
-            setupAutoPlayTriggers();
+            setupInteractionListeners();
             
-            // 段階的な自動再生試行
-            setTimeout(attemptImmediateAutoPlay, 100);
-            setTimeout(attemptDelayedAutoPlay, 500);
-            setTimeout(showInteractionPrompt, 2000);
+            // 段階的自動再生試行
+            setTimeout(tryImmediateAutoPlay, 100);
+            setTimeout(tryDelayedAutoPlay, 300);
+            setTimeout(showReadyState, 1000);
         });
-
+        
         function initializeAudio() {
-            // 両方の音声要素を設定
-            [audio, hiddenAudio].forEach(audioElement => {
-                audioElement.volume = 0.8;
-                audioElement.addEventListener('canplaythrough', function() {
-                    audioReady = true;
-                    status.textContent = '🎵 音声の準備ができました';
-                });
-                
-                audioElement.addEventListener('error', function(e) {
-                    status.textContent = '❌ 音声ファイルの読み込みに失敗';
-                    console.error('Audio error:', e);
-                });
+            // 音声コンテキストの準備
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('AudioContext not supported');
+            }
+            
+            // 音声イベントリスナー
+            audio.addEventListener('canplaythrough', function() {
+                audioReady = true;
+                hideLoading();
+                updateStatus('🎵 タップで音声を再生');
+                playIcon.textContent = '🎵';
+            });
+            
+            audio.addEventListener('play', function() {
+                isPlaying = true;
+                playIcon.textContent = '🔊';
+                updateStatus('🎵 再生中...');
+                controls.classList.add('visible');
+                showFullscreen();
+            });
+            
+            audio.addEventListener('pause', function() {
+                isPlaying = false;
+                playIcon.textContent = '🎵';
+                updateStatus('音声を停止しました');
+                hideFullscreen();
+            });
+            
+            audio.addEventListener('ended', function() {
+                isPlaying = false;
+                playIcon.textContent = '✅';
+                updateStatus('再生完了！');
+                hideFullscreen();
+            });
+            
+            audio.addEventListener('error', function(e) {
+                hideLoading();
+                playIcon.textContent = '❌';
+                updateStatus('音声読み込みエラー');
+                console.error('Audio error:', e);
             });
         }
-
-        function setupAutoPlayTriggers() {
-            // より包括的なユーザーインタラクション検知
+        
+        function setupInteractionListeners() {
+            // あらゆるユーザー操作を検知
             const interactionEvents = [
                 'touchstart', 'touchend', 'touchmove',
                 'mousedown', 'mouseup', 'mousemove',
-                'click', 'keydown', 'keyup',
-                'scroll', 'wheel'
+                'click', 'keydown', 'scroll',
+                'gesturestart', 'gesturechange', 'gestureend'
             ];
             
             interactionEvents.forEach(event => {
-                document.addEventListener(event, handleUserInteraction, {
-                    once: false,
+                document.addEventListener(event, handleFirstInteraction, {
+                    once: true,
                     passive: true,
                     capture: true
                 });
             });
-
-            // ページの可視性変更を検知
-            document.addEventListener('visibilitychange', function() {
-                if (!document.hidden && !autoPlayAttempted) {
-                    setTimeout(attemptAutoPlay, 200);
-                }
-            });
-
-            // フォーカスイベント
-            window.addEventListener('focus', function() {
-                if (!autoPlayAttempted) {
-                    setTimeout(attemptAutoPlay, 100);
-                }
-            });
-        }
-
-        function handleUserInteraction() {
-            if (!userInteracted) {
-                userInteracted = true;
-                setTimeout(attemptAutoPlay, 50);
-                
-                // タップ指示を非表示
-                tapInstruction.style.display = 'none';
-            }
-        }
-
-        function attemptImmediateAutoPlay() {
-            if (audioReady) {
-                tryAutoPlay(hiddenAudio, '即座の自動再生');
-            }
-        }
-
-        function attemptDelayedAutoPlay() {
-            if (!autoPlayAttempted && audioReady) {
-                tryAutoPlay(audio, '遅延自動再生');
-            }
-        }
-
-        function attemptAutoPlay() {
-            if (!autoPlayAttempted && audioReady) {
-                tryAutoPlay(audio, 'ユーザー操作後の自動再生');
-            }
-        }
-
-        function tryAutoPlay(audioElement, method) {
-            const playPromise = audioElement.play();
             
-            if (playPromise !== undefined) {
-                playPromise.then(function() {
-                    autoPlayAttempted = true;
-                    status.textContent = '🎵 音声を再生中...';
-                    playBtn.textContent = '⏸ 停止';
-                    playBtn.style.display = 'inline-block';
-                    autoPlayBtn.style.display = 'none';
-                    tapInstruction.style.display = 'none';
-                    audioControls.style.display = 'block';
-                    
-                    console.log(`成功: ${method}`);
-                    
-                    // メインの音声要素と同期
-                    if (audioElement === hiddenAudio && !audio.paused) {
-                        hiddenAudio.pause();
-                        audio.currentTime = hiddenAudio.currentTime;
-                        audio.play();
-                    }
-                    
-                }).catch(function(error) {
-                    console.log(`失敗: ${method} - ${error.message}`);
-                    
-                    // 自動再生に失敗した場合の対処
-                    if (!autoPlayAttempted) {
-                        showAutoPlayButton();
-                    }
+            // タップエリアの設定
+            tapArea.addEventListener('click', handleTapToPlay);
+            playCircle.addEventListener('click', handleTapToPlay);
+            
+            // モバイル特有のイベント
+            window.addEventListener('orientationchange', function() {
+                setTimeout(tryAutoPlay, 100);
+            });
+            
+            // ページフォーカス
+            window.addEventListener('focus', function() {
+                if (!autoPlayTriggered) {
+                    setTimeout(tryAutoPlay, 50);
+                }
+            });
+        }
+        
+        function handleFirstInteraction() {
+            userInteracted = true;
+            
+            // AudioContextの再開
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume().then(() => {
+                    console.log('AudioContext resumed');
                 });
             }
+            
+            // 少し遅延してから自動再生
+            setTimeout(tryAutoPlay, 50);
         }
-
-        function showAutoPlayButton() {
-            autoPlayBtn.style.display = 'inline-block';
-            autoPlayBtn.style.animation = 'glow 2s infinite';
-            tapInstruction.style.display = 'block';
-            status.textContent = '🎧 下のボタンをタップして音声を開始';
+        
+        function handleTapToPlay(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (!audioReady) {
+                showLoading();
+                updateStatus('音声を準備中...');
+                return;
+            }
+            
+            playAudio();
         }
-
-        function showInteractionPrompt() {
-            if (!autoPlayAttempted && !userInteracted) {
-                showAutoPlayButton();
+        
+        function tryImmediateAutoPlay() {
+            if (audioReady) {
+                tryAutoPlay();
             }
         }
-
-        function forceAutoPlay() {
-            // ユーザーが明示的にボタンをクリック
-            userInteracted = true;
-            autoPlayBtn.style.display = 'none';
+        
+        function tryDelayedAutoPlay() {
+            if (!autoPlayTriggered && audioReady) {
+                tryAutoPlay();
+            }
+        }
+        
+        function tryAutoPlay() {
+            if (autoPlayTriggered || !audioReady) return;
             
             const playPromise = audio.play();
-            playPromise.then(function() {
-                autoPlayAttempted = true;
-                status.textContent = '🎵 音声を再生中...';
-                playBtn.textContent = '⏸ 停止';
-                playBtn.style.display = 'inline-block';
-                tapInstruction.style.display = 'none';
-                audioControls.style.display = 'block';
-            }).catch(function(error) {
-                status.textContent = '❌ 再生エラーが発生しました';
-                console.error('Force play error:', error);
-            });
-        }
-
-        function playAudio() {
-            if (audio.paused) {
-                audio.play().then(function() {
-                    playBtn.textContent = '⏸ 停止';
-                    status.textContent = '🎵 音声を再生中...';
-                }).catch(function(error) {
-                    status.textContent = '❌ 再生エラーが発生しました';
-                    console.error('Play error:', error);
+            
+            if (playPromise) {
+                playPromise.then(() => {
+                    autoPlayTriggered = true;
+                    console.log('Auto-play successful');
+                }).catch(error => {
+                    console.log('Auto-play prevented:', error.message);
+                    // 自動再生失敗時の視覚的フィードバック
+                    playCircle.style.animation = 'pulse 1.5s infinite';
                 });
-            } else {
-                audio.pause();
-                playBtn.textContent = '▶ 再生';
-                status.textContent = '音声を停止しました';
             }
         }
-
-        // 音声再生終了時の処理
-        audio.addEventListener('ended', function() {
-            playBtn.textContent = '▶ 再生';
-            status.textContent = '再生が終了しました';
-        });
-
-        // 特別なモバイル対応
-        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-            // モバイルデバイス用の追加設定
-            document.addEventListener('touchstart', function enableAudio() {
-                audio.play().then(() => {
-                    audio.pause();
-                    audio.currentTime = 0;
-                }).catch(e => console.log('Touch enable failed:', e));
-                
-                // 一度だけ実行
-                document.removeEventListener('touchstart', enableAudio);
-            }, {once: true});
+        
+        function playAudio() {
+            if (!audioReady) return;
+            
+            showLoading();
+            
+            const playPromise = audio.play();
+            
+            if (playPromise) {
+                playPromise.then(() => {
+                    hideLoading();
+                    autoPlayTriggered = true;
+                    tapArea.style.display = 'none'; // タップエリアを非表示
+                }).catch(error => {
+                    hideLoading();
+                    updateStatus('再生エラー: ' + error.message);
+                    console.error('Play error:', error);
+                });
+            }
         }
-
-        // デバッグ用（本番では削除可能）
-        console.log('Auto-play system initialized');
-        console.log('User Agent:', navigator.userAgent);
+        
+        function toggleAudio() {
+            if (isPlaying) {
+                audio.pause();
+            } else {
+                playAudio();
+            }
+        }
+        
+        function pauseAudio() {
+            audio.pause();
+        }
+        
+        function showReadyState() {
+            if (!audioReady && !autoPlayTriggered) {
+                updateStatus('🎵 画面をタップして再生開始');
+                playCircle.style.animation = 'pulse 2s infinite';
+            }
+        }
+        
+        function showLoading() {
+            loadingSpinner.style.display = 'block';
+        }
+        
+        function hideLoading() {
+            loadingSpinner.style.display = 'none';
+        }
+        
+        function updateStatus(message) {
+            status.textContent = message;
+        }
+        
+        function showFullscreen() {
+            if (window.innerWidth <= 768) { // モバイルでのみ表示
+                fullscreenOverlay.classList.add('active');
+            }
+        }
+        
+        function hideFullscreen() {
+            fullscreenOverlay.classList.remove('active');
+        }
+        
+        function closeFullscreen() {
+            hideFullscreen();
+            pauseAudio();
+        }
+        
+        // モバイルブラウザ特有の対策
+        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+            // iOS Safari用の特別な設定
+            audio.load();
+            
+            // Web Audio APIによる追加最適化
+            if (audioContext) {
+                const source = audioContext.createMediaElementSource(audio);
+                const gainNode = audioContext.createGain();
+                source.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                gainNode.gain.value = 1.0;
+            }
+            
+            // バックグラウンド再生対応
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden && isPlaying) {
+                    // バックグラウンドでも継続再生
+                    console.log('Background play mode');
+                } else if (!document.hidden && !isPlaying) {
+                    // フォアグラウンド復帰時の再開試行
+                    setTimeout(tryAutoPlay, 100);
+                }
+            });
+        }
+        
+        // デバッグ情報（本番では削除可能）
+        console.log('Mobile audio system initialized');
+        console.log('User agent:', navigator.userAgent);
+        console.log('Audio support:', audio.canPlayType('audio/mpeg'));
     </script>
 </body>
 </html>
