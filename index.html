@@ -22,6 +22,18 @@
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
+            overflow: hidden;
+        }
+        
+        .tap-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            cursor: pointer;
+            background: rgba(0,0,0,0.01);
         }
         
         .container {
@@ -34,69 +46,99 @@
             text-align: center;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             border: 1px solid rgba(255,255,255,0.2);
+            position: relative;
+            z-index: 10;
         }
         
         .pulse-circle {
-            width: 120px;
-            height: 120px;
+            width: 140px;
+            height: 140px;
             margin: 0 auto 30px;
             border-radius: 50%;
             background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 40px;
-            animation: pulse 2s infinite;
+            font-size: 50px;
+            animation: strongPulse 1s infinite;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+            transition: all 0.2s;
+            box-shadow: 0 15px 35px rgba(255, 107, 107, 0.4);
+            position: relative;
         }
         
-        .pulse-circle:hover {
-            transform: scale(1.05);
-            box-shadow: 0 15px 35px rgba(255, 107, 107, 0.5);
+        .pulse-circle::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            border-radius: 50%;
+            background: rgba(255, 107, 107, 0.3);
+            animation: ripple 2s infinite;
         }
         
-        @keyframes pulse {
+        @keyframes strongPulse {
             0% { 
                 transform: scale(1);
-                box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+                box-shadow: 0 15px 35px rgba(255, 107, 107, 0.4);
             }
             50% { 
-                transform: scale(1.08);
-                box-shadow: 0 15px 35px rgba(255, 107, 107, 0.6);
+                transform: scale(1.15);
+                box-shadow: 0 20px 45px rgba(255, 107, 107, 0.8);
             }
             100% { 
                 transform: scale(1);
-                box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+                box-shadow: 0 15px 35px rgba(255, 107, 107, 0.4);
             }
         }
         
+        @keyframes ripple {
+            0% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+        
+        .urgent-message {
+            background: rgba(255, 193, 7, 0.9);
+            color: #000;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-weight: bold;
+            font-size: 18px;
+            animation: flash 2s infinite;
+            box-shadow: 0 10px 25px rgba(255, 193, 7, 0.3);
+        }
+        
+        @keyframes flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
         .title {
-            font-size: 24px;
-            margin-bottom: 15px;
+            font-size: 28px;
+            margin-bottom: 20px;
             font-weight: 300;
             letter-spacing: 1px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
         
         .status {
-            font-size: 16px;
-            margin: 20px 0;
-            opacity: 0.9;
-            min-height: 20px;
+            font-size: 18px;
+            margin: 25px 0;
+            opacity: 0.95;
+            min-height: 25px;
+            font-weight: 500;
         }
         
-        .tap-area {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            cursor: pointer;
-        }
-        
-        .audio-hidden {
+        .invisible-audio {
             position: absolute;
             left: -9999px;
             width: 1px;
@@ -104,409 +146,378 @@
             opacity: 0;
         }
         
-        .controls {
-            margin-top: 30px;
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
-        
-        .controls.visible {
-            opacity: 1;
-        }
-        
-        .control-btn {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            margin: 5px;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        
-        .control-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-        
-        .footer-text {
-            margin-top: 30px;
-            font-size: 14px;
-            opacity: 0.8;
-            line-height: 1.4;
-        }
-        
-        .loading-spinner {
-            display: none;
-            width: 30px;
-            height: 30px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top: 3px solid white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* モバイル特有の最適化 */
-        @media (max-width: 480px) {
-            .container {
-                padding: 30px 20px;
-                border-radius: 15px;
-            }
-            
-            .pulse-circle {
-                width: 100px;
-                height: 100px;
-                font-size: 35px;
-            }
-            
-            .title {
-                font-size: 20px;
-            }
-        }
-        
-        /* フルスクリーンモード */
-        .fullscreen-overlay {
-            display: none;
+        .multiple-trigger {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
+            pointer-events: none;
         }
         
-        .fullscreen-overlay.active {
-            display: flex;
-        }
-        
-        .close-btn {
+        .trigger-zone {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 30px;
+            background: transparent;
+            pointer-events: auto;
             cursor: pointer;
+        }
+        
+        .trigger-zone:nth-child(1) { top: 0; left: 0; width: 50%; height: 50%; }
+        .trigger-zone:nth-child(2) { top: 0; right: 0; width: 50%; height: 50%; }
+        .trigger-zone:nth-child(3) { bottom: 0; left: 0; width: 50%; height: 50%; }
+        .trigger-zone:nth-child(4) { bottom: 0; right: 0; width: 50%; height: 50%; }
+        
+        .countdown {
+            font-size: 60px;
+            font-weight: bold;
+            color: #ff4757;
+            text-shadow: 0 0 20px rgba(255, 71, 87, 0.8);
+            animation: countdownPulse 1s infinite;
+        }
+        
+        @keyframes countdownPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        /* モバイル最適化 */
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+                width: 95vw;
+            }
+            
+            .pulse-circle {
+                width: 120px;
+                height: 120px;
+                font-size: 45px;
+            }
+            
+            .title {
+                font-size: 24px;
+            }
+            
+            .urgent-message {
+                font-size: 16px;
+                padding: 15px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- フルスクリーン音声再生領域 -->
-    <div class="tap-area" id="tapArea"></div>
+    <!-- 複数の透明トリガーゾーン -->
+    <div class="multiple-trigger">
+        <div class="trigger-zone" onclick="forcePlay()"></div>
+        <div class="trigger-zone" onclick="forcePlay()"></div>
+        <div class="trigger-zone" onclick="forcePlay()"></div>
+        <div class="trigger-zone" onclick="forcePlay()"></div>
+    </div>
     
-    <div class="container" id="mainContainer">
-        <div class="pulse-circle" id="playCircle">
+    <!-- メイン透明オーバーレイ -->
+    <div class="tap-overlay" onclick="forcePlay()" ontouchstart="forcePlay()" ontouchmove="forcePlay()" ontouchend="forcePlay()"></div>
+    
+    <div class="container" onclick="forcePlay()">
+        <div class="pulse-circle" onclick="forcePlay()" ontouchstart="forcePlay()">
             <span id="playIcon">🎵</span>
         </div>
         
         <h1 class="title">音声メッセージ</h1>
-        <div class="status" id="status">画面をタップして再生</div>
         
-        <div class="loading-spinner" id="loadingSpinner"></div>
-        
-        <div class="controls" id="controls">
-            <button class="control-btn" id="playBtn" onclick="toggleAudio()">▶ 再生</button>
-            <button class="control-btn" id="pauseBtn" onclick="pauseAudio()">⏸ 停止</button>
+        <div class="urgent-message" id="urgentMsg">
+            📱 画面のどこでもタップ！
         </div>
         
-        <div class="footer-text">
-            QRコードからアクセスしていただき、<br>ありがとうございます！
-        </div>
+        <div class="status" id="status">音声を準備中...</div>
+        
+        <div id="countdown" class="countdown" style="display: none;"></div>
     </div>
     
-    <!-- 隠し音声要素（複数のフォールバック） -->
-    <audio class="audio-hidden" id="audioMain" preload="auto" crossorigin="anonymous">
+    <!-- 複数の隠し音声要素 -->
+    <audio class="invisible-audio" id="audio1" preload="auto" loop>
         <source src="./MenzuT-Kenshin.mp3" type="audio/mpeg">
         <source src="MenzuT-Kenshin.mp3" type="audio/mpeg">
-        <source src="./audio/MenzuT-Kenshin.mp3" type="audio/mpeg">
     </audio>
     
-    <!-- フルスクリーンオーバーレイ -->
-    <div class="fullscreen-overlay" id="fullscreenOverlay">
-        <button class="close-btn" onclick="closeFullscreen()">×</button>
-        <div class="pulse-circle" style="margin-bottom: 30px;">
-            <span>🎧</span>
-        </div>
-        <h2>音声を再生中...</h2>
-    </div>
+    <audio class="invisible-audio" id="audio2" preload="auto">
+        <source src="./MenzuT-Kenshin.mp3" type="audio/mpeg">
+        <source src="MenzuT-Kenshin.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio class="invisible-audio" id="audio3" preload="auto">
+        <source src="./MenzuT-Kenshin.mp3" type="audio/mpeg">
+        <source src="MenzuT-Kenshin.mp3" type="audio/mpeg">
+    </audio>
 
     <script>
-        const audio = document.getElementById('audioMain');
+        const audios = [
+            document.getElementById('audio1'),
+            document.getElementById('audio2'),
+            document.getElementById('audio3')
+        ];
         const status = document.getElementById('status');
-        const playCircle = document.getElementById('playCircle');
         const playIcon = document.getElementById('playIcon');
-        const controls = document.getElementById('controls');
-        const loadingSpinner = document.getElementById('loadingSpinner');
-        const tapArea = document.getElementById('tapArea');
-        const fullscreenOverlay = document.getElementById('fullscreenOverlay');
+        const urgentMsg = document.getElementById('urgentMsg');
+        const countdown = document.getElementById('countdown');
         
-        let audioContext = null;
+        let playAttempts = 0;
+        let maxAttempts = 50;
         let isPlaying = false;
         let audioReady = false;
-        let userInteracted = false;
-        let autoPlayTriggered = false;
+        let forceTriggered = false;
         
-        // 最適化されたオーディオ設定
-        audio.volume = 0.85;
-        audio.preload = 'auto';
-        
-        // ページ読み込み完了時
-        window.addEventListener('load', function() {
-            initializeAudio();
-            setupInteractionListeners();
-            
-            // 段階的自動再生試行
-            setTimeout(tryImmediateAutoPlay, 100);
-            setTimeout(tryDelayedAutoPlay, 300);
-            setTimeout(showReadyState, 1000);
+        // 音声設定
+        audios.forEach(audio => {
+            audio.volume = 0.9;
+            audio.preload = 'auto';
         });
         
-        function initializeAudio() {
-            // 音声コンテキストの準備
-            try {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            } catch (e) {
-                console.log('AudioContext not supported');
-            }
+        // 超積極的な初期化
+        window.addEventListener('load', initializeAggressive);
+        document.addEventListener('DOMContentLoaded', initializeAggressive);
+        
+        function initializeAggressive() {
+            console.log('🚀 Aggressive auto-play system starting...');
             
-            // 音声イベントリスナー
-            audio.addEventListener('canplaythrough', function() {
-                audioReady = true;
-                hideLoading();
-                updateStatus('🎵 タップで音声を再生');
-                playIcon.textContent = '🎵';
-            });
+            // 段階的な自動再生攻撃
+            setTimeout(() => tryPlayAudio(0), 50);
+            setTimeout(() => tryPlayAudio(1), 100);
+            setTimeout(() => tryPlayAudio(2), 200);
+            setTimeout(() => tryPlayAudio(0), 500);
+            setTimeout(() => tryPlayAudio(1), 800);
+            setTimeout(() => tryPlayAudio(2), 1200);
             
-            audio.addEventListener('play', function() {
-                isPlaying = true;
-                playIcon.textContent = '🔊';
-                updateStatus('🎵 再生中...');
-                controls.classList.add('visible');
-                showFullscreen();
-            });
+            // 準備完了チェック
+            setTimeout(checkReadiness, 300);
+            setTimeout(showUrgentPrompt, 2000);
+            setTimeout(startCountdown, 4000);
             
-            audio.addEventListener('pause', function() {
-                isPlaying = false;
-                playIcon.textContent = '🎵';
-                updateStatus('音声を停止しました');
-                hideFullscreen();
-            });
-            
-            audio.addEventListener('ended', function() {
-                isPlaying = false;
-                playIcon.textContent = '✅';
-                updateStatus('再生完了！');
-                hideFullscreen();
-            });
-            
-            audio.addEventListener('error', function(e) {
-                hideLoading();
-                playIcon.textContent = '❌';
-                updateStatus('音声読み込みエラー');
-                console.error('Audio error:', e);
-            });
+            setupHyperSensitiveListeners();
+            setupMultipleAudioSources();
         }
         
-        function setupInteractionListeners() {
-            // あらゆるユーザー操作を検知
-            const interactionEvents = [
-                'touchstart', 'touchend', 'touchmove',
-                'mousedown', 'mouseup', 'mousemove',
-                'click', 'keydown', 'scroll',
+        function setupHyperSensitiveListeners() {
+            // あらゆる可能なインタラクションイベント
+            const events = [
+                'touchstart', 'touchend', 'touchmove', 'touchcancel',
+                'mousedown', 'mouseup', 'mousemove', 'click',
+                'keydown', 'keyup', 'keypress',
+                'scroll', 'wheel', 'resize',
+                'focus', 'blur', 'change',
+                'devicemotion', 'deviceorientation',
                 'gesturestart', 'gesturechange', 'gestureend'
             ];
             
-            interactionEvents.forEach(event => {
-                document.addEventListener(event, handleFirstInteraction, {
-                    once: true,
-                    passive: true,
+            events.forEach(event => {
+                document.addEventListener(event, triggerPlay, {
+                    passive: false,
+                    capture: true
+                });
+                
+                window.addEventListener(event, triggerPlay, {
+                    passive: false,
+                    capture: true
+                });
+                
+                document.body.addEventListener(event, triggerPlay, {
+                    passive: false,
                     capture: true
                 });
             });
             
-            // タップエリアの設定
-            tapArea.addEventListener('click', handleTapToPlay);
-            playCircle.addEventListener('click', handleTapToPlay);
-            
-            // モバイル特有のイベント
-            window.addEventListener('orientationchange', function() {
-                setTimeout(tryAutoPlay, 100);
-            });
-            
-            // ページフォーカス
-            window.addEventListener('focus', function() {
-                if (!autoPlayTriggered) {
-                    setTimeout(tryAutoPlay, 50);
-                }
-            });
-        }
-        
-        function handleFirstInteraction() {
-            userInteracted = true;
-            
-            // AudioContextの再開
-            if (audioContext && audioContext.state === 'suspended') {
-                audioContext.resume().then(() => {
-                    console.log('AudioContext resumed');
-                });
+            // 特別なモバイルイベント
+            if ('ontouchstart' in window) {
+                document.addEventListener('touchstart', handleTouch, { passive: false });
+                document.addEventListener('touchmove', handleTouch, { passive: false });
+                document.addEventListener('touchend', handleTouch, { passive: false });
             }
-            
-            // 少し遅延してから自動再生
-            setTimeout(tryAutoPlay, 50);
         }
         
-        function handleTapToPlay(e) {
+        function handleTouch(e) {
             e.preventDefault();
-            e.stopPropagation();
-            
-            if (!audioReady) {
-                showLoading();
-                updateStatus('音声を準備中...');
-                return;
-            }
-            
-            playAudio();
+            forcePlay();
         }
         
-        function tryImmediateAutoPlay() {
-            if (audioReady) {
-                tryAutoPlay();
-            }
-        }
-        
-        function tryDelayedAutoPlay() {
-            if (!autoPlayTriggered && audioReady) {
-                tryAutoPlay();
-            }
-        }
-        
-        function tryAutoPlay() {
-            if (autoPlayTriggered || !audioReady) return;
-            
-            const playPromise = audio.play();
-            
-            if (playPromise) {
-                playPromise.then(() => {
-                    autoPlayTriggered = true;
-                    console.log('Auto-play successful');
-                }).catch(error => {
-                    console.log('Auto-play prevented:', error.message);
-                    // 自動再生失敗時の視覚的フィードバック
-                    playCircle.style.animation = 'pulse 1.5s infinite';
+        function setupMultipleAudioSources() {
+            audios.forEach((audio, index) => {
+                audio.addEventListener('canplaythrough', () => {
+                    audioReady = true;
+                    console.log(`Audio ${index + 1} ready`);
                 });
-            }
-        }
-        
-        function playAudio() {
-            if (!audioReady) return;
-            
-            showLoading();
-            
-            const playPromise = audio.play();
-            
-            if (playPromise) {
-                playPromise.then(() => {
-                    hideLoading();
-                    autoPlayTriggered = true;
-                    tapArea.style.display = 'none'; // タップエリアを非表示
-                }).catch(error => {
-                    hideLoading();
-                    updateStatus('再生エラー: ' + error.message);
-                    console.error('Play error:', error);
+                
+                audio.addEventListener('play', () => {
+                    if (!isPlaying) {
+                        isPlaying = true;
+                        onPlaySuccess();
+                    }
                 });
-            }
-        }
-        
-        function toggleAudio() {
-            if (isPlaying) {
-                audio.pause();
-            } else {
-                playAudio();
-            }
-        }
-        
-        function pauseAudio() {
-            audio.pause();
-        }
-        
-        function showReadyState() {
-            if (!audioReady && !autoPlayTriggered) {
-                updateStatus('🎵 画面をタップして再生開始');
-                playCircle.style.animation = 'pulse 2s infinite';
-            }
-        }
-        
-        function showLoading() {
-            loadingSpinner.style.display = 'block';
-        }
-        
-        function hideLoading() {
-            loadingSpinner.style.display = 'none';
-        }
-        
-        function updateStatus(message) {
-            status.textContent = message;
-        }
-        
-        function showFullscreen() {
-            if (window.innerWidth <= 768) { // モバイルでのみ表示
-                fullscreenOverlay.classList.add('active');
-            }
-        }
-        
-        function hideFullscreen() {
-            fullscreenOverlay.classList.remove('active');
-        }
-        
-        function closeFullscreen() {
-            hideFullscreen();
-            pauseAudio();
-        }
-        
-        // モバイルブラウザ特有の対策
-        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-            // iOS Safari用の特別な設定
-            audio.load();
-            
-            // Web Audio APIによる追加最適化
-            if (audioContext) {
-                const source = audioContext.createMediaElementSource(audio);
-                const gainNode = audioContext.createGain();
-                source.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                gainNode.gain.value = 1.0;
-            }
-            
-            // バックグラウンド再生対応
-            document.addEventListener('visibilitychange', function() {
-                if (document.hidden && isPlaying) {
-                    // バックグラウンドでも継続再生
-                    console.log('Background play mode');
-                } else if (!document.hidden && !isPlaying) {
-                    // フォアグラウンド復帰時の再開試行
-                    setTimeout(tryAutoPlay, 100);
-                }
+                
+                audio.addEventListener('error', (e) => {
+                    console.error(`Audio ${index + 1} error:`, e);
+                });
             });
         }
         
-        // デバッグ情報（本番では削除可能）
-        console.log('Mobile audio system initialized');
-        console.log('User agent:', navigator.userAgent);
-        console.log('Audio support:', audio.canPlayType('audio/mpeg'));
+        function triggerPlay() {
+            if (!forceTriggered) {
+                forcePlay();
+            }
+        }
+        
+        async function forcePlay() {
+            if (forceTriggered) return;
+            forceTriggered = true;
+            
+            console.log('🎯 Force play triggered!');
+            urgentMsg.style.display = 'none';
+            countdown.style.display = 'none';
+            
+            // 複数の音声を同時に再生試行
+            for (let i = 0; i < audios.length; i++) {
+                tryPlayAudio(i);
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            // Web Audio API使用（より確実）
+            tryWebAudioPlay();
+            
+            // 最終手段：連続再生試行
+            if (!isPlaying) {
+                continuousPlayAttempt();
+            }
+        }
+        
+        async function tryPlayAudio(audioIndex) {
+            if (playAttempts >= maxAttempts) return;
+            playAttempts++;
+            
+            const audio = audios[audioIndex];
+            
+            try {
+                // AudioContextを作成・再開
+                if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    if (audioContext.state === 'suspended') {
+                        await audioContext.resume();
+                    }
+                }
+                
+                audio.currentTime = 0;
+                const playPromise = audio.play();
+                
+                if (playPromise) {
+                    await playPromise;
+                    console.log(`✅ Audio ${audioIndex + 1} playing successfully!`);
+                    return true;
+                }
+            } catch (error) {
+                console.log(`❌ Audio ${audioIndex + 1} failed:`, error.message);
+                
+                // 失敗時は他の音声も試行
+                setTimeout(() => {
+                    if (!isPlaying && playAttempts < maxAttempts) {
+                        tryPlayAudio((audioIndex + 1) % audios.length);
+                    }
+                }, 50);
+            }
+            
+            return false;
+        }
+        
+        function tryWebAudioPlay() {
+            try {
+                if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.1);
+                    
+                    // 成功したら実際の音声も再生
+                    setTimeout(() => tryPlayAudio(0), 100);
+                }
+            } catch (error) {
+                console.log('Web Audio API failed:', error);
+            }
+        }
+        
+        function continuousPlayAttempt() {
+            if (isPlaying || playAttempts >= maxAttempts) return;
+            
+            const randomAudio = Math.floor(Math.random() * audios.length);
+            tryPlayAudio(randomAudio);
+            
+            setTimeout(continuousPlayAttempt, 200);
+        }
+        
+        function onPlaySuccess() {
+            status.textContent = '🎵 音声再生中...';
+            playIcon.textContent = '🔊';
+            urgentMsg.style.display = 'none';
+            countdown.style.display = 'none';
+            document.body.style.background = 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)';
+            
+            console.log('🎉 Audio playing successfully!');
+        }
+        
+        function checkReadiness() {
+            if (audioReady) {
+                status.textContent = '🎵 音声準備完了 - タップして再生';
+            } else {
+                status.textContent = '音声を読み込み中...';
+                setTimeout(checkReadiness, 500);
+            }
+        }
+        
+        function showUrgentPrompt() {
+            if (!isPlaying) {
+                urgentMsg.innerHTML = '🚨 緊急: どこでもタップしてください！';
+                urgentMsg.style.animation = 'flash 0.5s infinite';
+            }
+        }
+        
+        function startCountdown() {
+            if (isPlaying) return;
+            
+            let count = 5;
+            countdown.style.display = 'block';
+            countdown.textContent = count;
+            
+            const countInterval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countdown.textContent = count;
+                } else {
+                    countdown.textContent = '🎵';
+                    clearInterval(countInterval);
+                    forcePlay();
+                }
+            }, 1000);
+        }
+        
+        // ページ可視性変更時の再試行
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && !isPlaying) {
+                setTimeout(forcePlay, 100);
+            }
+        });
+        
+        // 最終手段：1秒毎の自動試行
+        setInterval(() => {
+            if (!isPlaying && !forceTriggered && playAttempts < maxAttempts) {
+                tryPlayAudio(Math.floor(Math.random() * audios.length));
+            }
+        }, 1000);
+        
+        // デバッグ情報
+        console.log('🎵 Ultra-aggressive mobile audio system loaded');
+        console.log('📱 User Agent:', navigator.userAgent);
+        console.log('🔊 Audio support:', audios[0].canPlayType('audio/mpeg'));
     </script>
 </body>
 </html>
